@@ -39,7 +39,10 @@ FUNCTION z_bc_mail_nast_invo_archive.
 
     IF merge_result <> 0 OR merged_pdf IS INITIAL.
       merger->get_err_doc_index( IMPORTING index = error_index ).
-      MESSAGE e014(zbc_mail_nast_invo) WITH object_id error_index.
+      " Objekt-ID zuletzt: sie ist bis zu 50 Zeichen lang und wuerde den
+      " SM58-Statustext sonst abschneiden
+      DATA(document_count) = lines( documents ).
+      MESSAGE e014(zbc_mail_nast_invo) WITH error_index document_count merge_result object_id.
     ENDIF.
   ENDIF.
 

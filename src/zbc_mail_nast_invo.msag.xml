@@ -36,7 +36,7 @@
      <SPRSL>D</SPRSL>
      <ARBGB>ZBC_MAIL_NAST_INVO</ARBGB>
      <MSGNR>014</MSGNR>
-     <TEXT>PDF-Zusammenfuehrung fuer &amp;1 fehlgeschlagen (Dokument &amp;2)</TEXT>
+     <TEXT>PDF-Merge: Dokument &amp;1 von &amp;2 fehlerhaft (RC &amp;3) zu &amp;4</TEXT>
     </T100>
    </T100>
   </asx:values>
