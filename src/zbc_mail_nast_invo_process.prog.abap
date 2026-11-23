@@ -11,306 +11,329 @@
 *&   - kein COMMIT, kein Dialog, keine Exception aus FORM ENTRY heraus
 *&   - Ablage per tRFC (ZCL_BC_MAIL_NAST_INVO_ARCHIVE)
 *&---------------------------------------------------------------------*
-REPORT zbc_mail_nast_invo_process.
+report zbc_mail_nast_invo_process.
 
 " Werden von der Nachrichtensteuerung gefuellt, wenn sie hier deklariert sind
-TABLES: nast,        " Nachrichtenstatus
+tables: nast,        " Nachrichtenstatus
         tnapr,       " Verarbeitungsprogramm/Formular aus NACE
         toa_dara.    " ArchiveLink-Index (SAP_OBJECT, AR_OBJECT aus NACE > Ablagesystem)
 
 
-CLASS lcl_invoice_mail DEFINITION FINAL.
-  PUBLIC SECTION.
-    TYPES: BEGIN OF processing_result,
-             invoice_number TYPE vbeln_vf,
-             sent           TYPE abap_bool,
-             total_size     TYPE i,
-           END OF processing_result.
+class lcl_invoice_mail definition final.
+  public section.
+    types: begin of processing_result,
+             invoice_number type vbeln_vf,
+             sent           type abap_bool,
+             total_size     type i,
+           end of processing_result.
 
-    METHODS constructor
-      IMPORTING message        TYPE nast
-                output_program TYPE tnapr
-                archive_index  TYPE toa_dara.
+    methods constructor
+      importing message        type nast
+                output_program type tnapr
+                archive_index  type toa_dara.
 
-    METHODS process
-      RETURNING VALUE(result) TYPE processing_result
-      RAISING   zcx_sm_sta_send_mail
-                zcx_sm_sta_exception.
+    methods process
+      returning value(result) type processing_result
+      raising   zcx_sm_sta_send_mail.
 
-  PRIVATE SECTION.
-    TYPES: BEGIN OF invoice_header,
-             vbeln TYPE vbeln_vf,
-             vkorg TYPE vkorg,
-           END OF invoice_header.
+  private section.
+    types: begin of invoice_header,
+             vbeln type vbeln_vf,
+             vkorg type vkorg,
+           end of invoice_header.
 
-    CONSTANTS:
+    constants:
       " Eigene Dokumentart (OAC2, Dokumentklasse PDF, OAC3 mit VBRK verknuepft)
-      attachment_doc_type      TYPE saeobjart VALUE 'ZSDINVATT',
+      attachment_doc_type      type saeobjart value 'ZSDINVATT',
       " Fallback, falls in NACE > Ablagesystem keine Dokumentart gepflegt ist
-      default_invoice_doc_type TYPE saeobjart VALUE 'SDOINVOICE',
-      default_sap_object       TYPE saeanwdid VALUE 'VBRK',
+      default_invoice_doc_type type saeobjart value 'SDOINVOICE',
+      default_sap_object       type saeanwdid value 'VBRK',
       " Rohgroesse; die MIME-Mail ist durch Base64 ca. 37 % groesser
-      max_size_in_bytes        TYPE i VALUE 10485760,
-      body_text_prefix         TYPE string VALUE `ZBC_MAIL_NAST_INVO_BODY`,
-      signature_text_prefix    TYPE string VALUE `ZBC_MAIL_NAST_INVO_SIGN`.
+      max_size_in_bytes        type i value 10485760,
+      body_text_prefix         type string value `ZBC_MAIL_NAST_INVO_BODY_`,
+      signature_text_prefix    type string value `ZCA_`,
+      signature_text_postfix    type string value `_SIGNATURE`.
 
-    CONSTANTS:
-      BEGIN OF archive_mode,
-        print_only   TYPE nast-tdarmod VALUE '1',
-        archive_only TYPE nast-tdarmod VALUE '2',
-        both         TYPE nast-tdarmod VALUE '3',
-      END OF archive_mode.
+    constants:
+      begin of archive_mode,
+        print_only   type nast-tdarmod value '1',
+        archive_only type nast-tdarmod value '2',
+        both         type nast-tdarmod value '3',
+      end of archive_mode.
 
-    DATA message        TYPE nast.
-    DATA output_program TYPE tnapr.
-    DATA archive_index  TYPE toa_dara.
+    data message        type nast.
+    data output_program type tnapr.
+    data archive_index  type toa_dara.
+    data invoice_number type vbeln_vf.
 
-    METHODS get_invoice_header
-      RETURNING VALUE(result) TYPE invoice_header
-      RAISING   zcx_sm_sta_send_mail.
+    methods get_documents
+      returning value(result) type zcl_bc_mail_nast_invo_mail=>attachment_list
+      raising   zcx_sm_sta_send_mail.
 
-    METHODS get_documents
-      IMPORTING invoice       TYPE invoice_header
-      RETURNING VALUE(result) TYPE zcl_bc_mail_nast_invo_mail=>attachment_list
-      RAISING   zcx_sm_sta_send_mail.
+    methods get_invoice_pdf
+      returning value(result) type zcl_bc_mail_nast_invo_mail=>attachment_list
+      raising   zcx_sm_sta_send_mail.
 
-    METHODS get_invoice_pdf
-      IMPORTING invoice       TYPE invoice_header
-      RETURNING VALUE(result) TYPE fpcontent
-      RAISING   zcx_sm_sta_send_mail.
+    methods get_attachments
+      returning value(result) type zcl_bc_mail_nast_invo_mail=>attachment_list
+      raising   zcx_sm_sta_send_mail.
 
-    METHODS get_attachments
-      IMPORTING invoice       TYPE invoice_header
-      RETURNING VALUE(result) TYPE zcl_bc_mail_nast_invo_mail=>attachment_list.
+    methods get_recipient_address
+      returning value(result) type ad_smtpadr
+      raising   zcx_sm_sta_send_mail.
 
-    METHODS get_recipient_address
-      IMPORTING invoice       TYPE invoice_header
-      RETURNING VALUE(result) TYPE ad_smtpadr.
+    methods get_sender_address
+      returning value(result) type AD_SMTPADR.
 
-    METHODS get_sender_address
-      IMPORTING invoice       TYPE invoice_header
-      RETURNING VALUE(result) TYPE ad_smtpadr.
+    methods build_mail_settings
+      returning value(result) type zcl_bc_mail_nast_invo_mail=>mail_config
+      raising   zcx_sm_sta_send_mail.
 
-    METHODS build_mail_settings
-      IMPORTING invoice       TYPE invoice_header
-      RETURNING VALUE(result) TYPE zcl_bc_mail_nast_invo_mail=>mail_config.
+    methods build_archive_settings
+      returning value(result) type zcl_bc_mail_nast_invo_mail=>archive_config.
 
-    METHODS build_archive_settings
-      IMPORTING invoice       TYPE invoice_header
-      RETURNING VALUE(result) TYPE zcl_bc_mail_nast_invo_mail=>archive_config.
-
-ENDCLASS.
+endclass.
 
 
-CLASS lcl_nast_protocol DEFINITION FINAL.
-  PUBLIC SECTION.
-    "! Uebernimmt die aktuelle Systemnachricht (SY-MSG*) ins NAST-Protokoll
-    CLASS-METHODS add_system_message.
-ENDCLASS.
+class lcl_nast_protocol definition final.
+  public section.
+    class-methods add_logger importing logger type ref to zif_sm_sta_msg_handler.
+endclass.
 
 
 *&---------------------------------------------------------------------*
 *& Einstieg aus der Nachrichtensteuerung (NACE: FORM-Routine ENTRY)
 *&---------------------------------------------------------------------*
-FORM entry USING return_code LIKE sy-subrc
-                 us_screen   TYPE c.
+form entry using return_code like sy-subrc
+                 us_screen   type c.
 
   return_code = 0.
 
-  IF us_screen = abap_true.
-    " Bildschirmausgabe (z. B. Vorschau in VF03): kein Versand
-    MESSAGE s012(zbc_mail_nast_invo) INTO DATA(preview_text) ##NEEDED.
-    lcl_nast_protocol=>add_system_message( ).
-    RETURN.
-  ENDIF.
+  data(msg_handler) = zcl_sm_sta_msg_handler_factory=>get_instance( ).
+  if us_screen = abap_true.
+    msg_handler->add_info_message( id_id = 'ZBC_MAIL_NAST_INVO' id_number = '012' ).
+    if 1 = 2. message s012(zbc_mail_nast_invo). endif.
+    lcl_nast_protocol=>add_logger( msg_handler ).
+    return.
+  endif.
 
-  TRY.
-      DATA(result) = NEW lcl_invoice_mail( message        = nast
+  try.
+      data(result) = new lcl_invoice_mail( message        = nast
                                            output_program = tnapr
                                            archive_index  = toa_dara )->process( ).
 
-      IF result-sent = abap_true.
-        MESSAGE s011(zbc_mail_nast_invo) WITH result-invoice_number result-total_size INTO DATA(success_text) ##NEEDED.
-      ELSE.
-        MESSAGE s013(zbc_mail_nast_invo) WITH result-invoice_number INTO DATA(archive_text) ##NEEDED.
-      ENDIF.
-      lcl_nast_protocol=>add_system_message( ).
+      if result-sent = abap_true.
+        msg_handler->add_info_message( id_id = 'ZBC_MAIL_NAST_INVO' id_number = '011' id_v1 = result-invoice_number id_v2_i = result-total_size ).
+        if 1 = 2. message s011(zbc_mail_nast_invo) with space space. endif.
+      else.
+        msg_handler->add_info_message( id_id = 'ZBC_MAIL_NAST_INVO' id_number = '013' id_v1 = result-invoice_number  ).
+        if 1 = 2. message s013(zbc_mail_nast_invo) with space . endif.
+      endif.
+      lcl_nast_protocol=>add_logger( msg_handler ).
 
-    CATCH cx_root INTO DATA(error).
+    catch cx_root into data(lox_root).
       " Bei Versandzeitpunkt 4 (Verbuchung) darf nichts aus der Routine
       " herauslaufen, sonst bricht die Verbuchung der Faktura ab.
-      MESSAGE error TYPE 'E' INTO DATA(error_text) ##NEEDED.
-      lcl_nast_protocol=>add_system_message( ).
+      msg_handler->add_exception_class( id_with_ex_name = abap_false io_ex = lox_root ).
 
       " Ursache aus der Exception-Kette zusaetzlich protokollieren
-      DATA(previous_error) = error->previous.
-      IF previous_error IS BOUND.
-        MESSAGE previous_error TYPE 'E' INTO DATA(previous_text) ##NEEDED.
-        lcl_nast_protocol=>add_system_message( ).
-      ENDIF.
-
+      data(previous_error) = lox_root->previous.
+      if previous_error is bound.
+        msg_handler->add_exception_class( id_with_ex_name = abap_false io_ex = previous_error ).
+      endif.
+      lcl_nast_protocol=>add_logger( msg_handler ).
       return_code = 1.
-  ENDTRY.
-ENDFORM.
+  endtry.
+endform.
 
 
-CLASS lcl_nast_protocol IMPLEMENTATION.
+class lcl_nast_protocol implementation.
 
-  METHOD add_system_message.
-    CALL FUNCTION 'NAST_PROTOCOL_UPDATE'
-      EXPORTING  msg_arbgb = sy-msgid
-                 msg_nr    = sy-msgno
-                 msg_ty    = sy-msgty
-                 msg_v1    = sy-msgv1
-                 msg_v2    = sy-msgv2
-                 msg_v3    = sy-msgv3
-                 msg_v4    = sy-msgv4
-      EXCEPTIONS OTHERS    = 1.
-    " SY-SUBRC bewusst nicht ausgewertet: ein nicht schreibbares Protokoll
-    " darf die Verarbeitung nicht abbrechen.
-  ENDMETHOD.
+  method add_logger.
+    loop at logger->get_bapiret2( ) reference into data(bapiret2).
+      call function 'NAST_PROTOCOL_UPDATE'
+        exporting
+          msg_arbgb = bapiret2->id
+          msg_nr    = bapiret2->number
+          msg_ty    = bapiret2->type
+          msg_v1    = bapiret2->message_v1
+          msg_v2    = bapiret2->message_v2
+          msg_v3    = bapiret2->message_v3
+          msg_v4    = bapiret2->message_v4
+        exceptions
+          others    = 1.
+      " SY-SUBRC bewusst nicht ausgewertet: ein nicht schreibbares Protokoll
+      " darf die Verarbeitung nicht abbrechen.
+    endloop.
+  endmethod.
 
-ENDCLASS.
+endclass.
 
 
-CLASS lcl_invoice_mail IMPLEMENTATION.
+class lcl_invoice_mail implementation.
 
-  METHOD constructor.
+  method constructor.
     me->message        = message.
     me->output_program = output_program.
     me->archive_index  = archive_index.
-  ENDMETHOD.
+    me->invoice_number = conv vbeln_vf( message-objky ).
+  endmethod.
 
 
-  METHOD process.
-    DATA(invoice)          = get_invoice_header( ).
-    DATA(documents)        = get_documents( invoice ).
-    DATA(archive_settings) = COND zcl_bc_mail_nast_invo_mail=>archive_config( WHEN message-tdarmod = archive_mode-archive_only
-                                                                                   OR message-tdarmod = archive_mode-both
-                                                                                 THEN build_archive_settings( invoice ) ).
+  method process.
+    data(documents) = get_documents(  ).
 
-    result-invoice_number = invoice-vbeln.
+    result-invoice_number = me->invoice_number.
     result-total_size     = zcl_bc_mail_nast_invo_mail=>calculate_total_size( documents ).
 
-    IF message-tdarmod = archive_mode-archive_only.
-      NEW zcl_bc_mail_nast_invo_mail(
-          mail_settings    = VALUE #( sales_organization = invoice-vkorg )
-          archive_settings = archive_settings
-        )->archive_invoice( invoice_number = invoice-vbeln
-                            documents      = documents ).
-      RETURN.
-    ENDIF.
+    data(mail) = new zcl_bc_mail_nast_invo_mail( mail_settings    = build_mail_settings(  )
+                                                 archive_settings = build_archive_settings(  ) ).
 
-    " Pro E-Mail immer eine neue Instanz (MI_BODY der Basisklasse wird nicht geleert)
-    NEW zcl_bc_mail_nast_invo_mail(
-        mail_settings    = build_mail_settings( invoice )
-        archive_settings = archive_settings
-      )->send_invoice( invoice_number = invoice-vbeln
-                       documents      = documents ).
+    if message-tdarmod = archive_mode-archive_only.
+      mail->archive_invoice( invoice_number = me->invoice_number
+                             documents      = documents ).
+      return.
+    endif.
 
+    mail->send_invoice( invoice_number = me->invoice_number
+                        documents      = documents ).
     result-sent = abap_true.
-  ENDMETHOD.
-
-
-  METHOD get_invoice_header.
-    " Bei Zeitpunkt 4 sieht die Verbuchung ihre eigenen, noch nicht
-    " committeten Saetze, VBRK ist also bereits lesbar.
-    DATA(invoice_number) = CONV vbeln_vf( message-objky(10) ).
-
-    SELECT SINGLE FROM vbrk
-      FIELDS vbeln, vkorg
-      WHERE vbeln = @invoice_number
-      INTO @result.
-    IF sy-subrc <> 0.
-      RAISE EXCEPTION TYPE zcx_sm_sta_send_mail
-        EXPORTING textid = zcx_sm_sta_send_mail=>zcx_error.
-    ENDIF.
-  ENDMETHOD.
-
-
-  METHOD get_documents.
+  endmethod.
+  method get_documents.
     " Konvention: Zeile 1 = Rechnung, ab Zeile 2 = Anhaenge
-    result = VALUE #( ( document       = get_invoice_pdf( invoice )
+    insert lines of get_invoice_pdf(  ) into table result.
+    insert lines of get_attachments(  ) into table result.
+  endmethod.
+
+
+  method get_invoice_pdf.
+    data(nast) = value nast( objky = invoice_number
+                         kappl = zif_sta_sd_inv_nast=>co_kappl_invoice
+                         parnr = message-parnr
+                         kschl = zif_sta_sd_inv_nast=>co_msg_type_invoice_mail
+                         ldest  = zif_sta_sd_inv_form=>co_ldest_locl ).
+
+    select single from tnapr
+       fields *
+         where kschl = @nast-kschl
+         and   nacha = @zif_sta_sd_inv_nast=>co_trans_medium_print_output
+         and   kappl = @nast-kappl
+         into @data(tnapr).
+
+    data(attachment_pdf) = value fpcontent( ).
+    zcl_idoc_invo_joubini_mode_fac=>get_instance(  invoice_number )->set_processing_mode(  zif_idoc_invo_joubini_mode=>processing_mode_attachm_only ).
+    call function '/IX2/EINV_GET_PDF'
+      exporting
+        is_nast  = nast
+        is_tnapr = tnapr
+      importing
+        ef_pdf   = attachment_pdf.
+
+    if attachment_pdf is initial.
+      data(msg_handler) = zcl_sm_sta_msg_handler_factory=>get_instance( ).
+      msg_handler->add_error_message( id_id = 'ZBC01' id_number = 009 id_v1 = me->invoice_number ).
+      raise exception type zcx_sm_sta_send_mail exporting mi_messages = msg_handler->get_messages( ).
+      if 1 = 2. message e009(zbc01) with space. endif.
+    endif.
+
+    result = value #( ( document       = attachment_pdf
                         document_type  = 'application/pdf'
-                        document_title = |{ 'Rechnung'(001) } { invoice-vbeln ALPHA = OUT }| ) ).
-    INSERT LINES OF get_attachments( invoice ) INTO TABLE result.
-  ENDMETHOD.
+                        document_title = |{ 'Rechnung'(001) } { me->invoice_number alpha = out } | ) ).
+
+  endmethod.
 
 
-  METHOD get_invoice_pdf.
-    " TODO: Eure bestehende PDF-Erzeugung einbinden (Adobe-Formular mit GETPDF).
-    " Der Formularname steht in OUTPUT_PROGRAM-SFORM (NACE: PDF/SmartForm-Formular),
-    " die Sprache in MESSAGE-SPRAS.
-    "
-    "   result = zcl_..._invoice_pdf=>create( invoice_number = invoice-vbeln
-    "                                         form_name      = output_program-sform
-    "                                         language       = message-spras ).
-    "
-    " Wichtig fuer Zeitpunkt 4: keine Vorschau, kein Druckdialog
-    " (FP_JOB_OPEN: outputparams-nodialog = abap_true, getpdf = abap_true).
-    IF result IS INITIAL.
-      RAISE EXCEPTION TYPE zcx_sm_sta_send_mail
-        EXPORTING textid = zcx_sm_sta_send_mail=>zcx_error.
-    ENDIF.
-  ENDMETHOD.
+  method get_attachments.
+
+    try.
+        data(attachments) = zcl_idoc_invo_joubini_atta_fac=>get_instance( me->invoice_number )->get_mail_attachments(  ).
+
+      catch /ix2/cx_einvoice_exception into data(lox_einvoice_exception).
+        data(messages) = value bapiret2_t( (  type = lox_einvoice_exception->gs_message-msgty
+                                              id = lox_einvoice_exception->gs_message-msgid
+                                              number = lox_einvoice_exception->gs_message-msgno
+                                              message_v1 = lox_einvoice_exception->gs_message-msgv1
+                                              message_v2 = lox_einvoice_exception->gs_message-msgv2
+                                              message_v3 = lox_einvoice_exception->gs_message-msgv3
+                                              message_v4  = lox_einvoice_exception->gs_message-msgv4 ) ) .
+        raise exception type zcx_sm_sta_send_mail exporting mi_messages = messages.
+    endtry.
+
+    loop at attachments reference into data(attachment).
+      insert value #( document       = attachment->content
+                      document_type  = 'application/pdf'
+                      document_title = attachment->title ) into table result.
+    endloop.
+
+  endmethod.
 
 
-  METHOD get_attachments.
-    " TODO: Eure bestehende Ermittlung der Anhaenge (Struktur mit DOCUMENT und
-    " Include ZSTA_BO_DIR_DOCS) einbinden. Es werden nur PDFs akzeptiert.
-    CLEAR result.
-  ENDMETHOD.
+  method get_recipient_address.
+
+    select single
+     from zbc_idoc_jou_acr
+     fields email
+      where kunnr = @me->message-parnr
+      into @data(email_recipient).
+
+    if sy-subrc <> 0 or email_recipient is initial.
+      data(msg_handler) = zcl_sm_sta_msg_handler_factory=>get_instance( ).
+      msg_handler->add_error_message( id_id = 'ZBC01' id_number = 015 id_v1 = me->message-parnr ).
+      raise exception type zcx_sm_sta_send_mail exporting mi_messages = msg_handler->get_messages( ).
+      if 1 = 2. message e015(zbc01) with space. endif.
+    endif.
+    result = email_recipient.
+
+  endmethod.
 
 
-  METHOD get_recipient_address.
-    " Standard-E-Mail-Adresse des Nachrichtenpartners (NACE: Partnerrolle, z. B. RE)
-    SELECT SINGLE FROM vbpa
-      INNER JOIN adr6 ON adr6~addrnumber = vbpa~adrnr
-      FIELDS adr6~smtp_addr
-      WHERE vbpa~vbeln      = @invoice-vbeln
-        AND vbpa~posnr      = '000000'
-        AND vbpa~parvw      = @message-parvw
-        AND adr6~persnumber = @space
-        AND adr6~flgdefault = @abap_true
-      INTO @result.
-  ENDMETHOD.
-
-
-  METHOD get_sender_address.
+  method get_sender_address.
     " E-Mail-Adresse aus der Adresse der Verkaufsorganisation (OVX5).
     " Ist keine gepflegt, verwendet die Basisklasse den SAP-Benutzer als Absender.
-    SELECT SINGLE FROM tvko
-      INNER JOIN adr6 ON adr6~addrnumber = tvko~adrnr
-      FIELDS adr6~smtp_addr
-      WHERE tvko~vkorg      = @invoice-vkorg
-        AND adr6~persnumber = @space
-        AND adr6~flgdefault = @abap_true
-      INTO @result.
-  ENDMETHOD.
+   select single
+     from vbrk
+     inner join tvko on tvko~vkorg = vbrk~vkorg
+      inner join adr6 on adr6~addrnumber = tvko~adrnr
+      fields adr6~smtp_addr
+      where vbrk~vbeln      = @me->invoice_number
+        and adr6~persnumber = @space
+        and adr6~flgdefault = @abap_true
+      into @result.
+  endmethod.
 
 
-  METHOD build_mail_settings.
-    result = VALUE #( sender_address      = get_sender_address( invoice )
-                      recipient_address   = get_recipient_address( invoice )
-                      body_text_name      = |{ body_text_prefix }_{ invoice-vkorg }|
-                      signature_text_name = |{ signature_text_prefix }_{ invoice-vkorg }|
-                      sales_organization  = invoice-vkorg
+  method build_mail_settings.
+
+    select single
+     from vbrk
+     fields vkorg, bukrs
+     where vbeln = @me->invoice_number
+     into @data(organization).
+
+    result = value #( sender_address      = get_sender_address(   )
+                      recipient_address   = get_recipient_address(  )
+                      body_text_name      = |{ body_text_prefix }{ organization-vkorg }|
+                      signature_text_name = |{ signature_text_prefix }{ organization-bukrs }{ signature_text_postfix }|
+                      sales_organization  = organization-vkorg
                       max_size_in_bytes   = max_size_in_bytes ).
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD build_archive_settings.
+  method build_archive_settings.
     " SAP_OBJECT und AR_OBJECT kommen aus NACE > Ablagesystem (via TOA_DARA)
-    result = VALUE #(
-        active              = abap_true
-        sap_object          = COND #( WHEN archive_index-sap_object IS NOT INITIAL
-                                      THEN archive_index-sap_object
-                                      ELSE default_sap_object )
-        object_id           = CONV #( invoice-vbeln )
-        invoice_doc_type    = COND #( WHEN archive_index-ar_object IS NOT INITIAL
-                                      THEN archive_index-ar_object
-                                      ELSE default_invoice_doc_type )
-        attachment_doc_type = attachment_doc_type ).
-  ENDMETHOD.
+    result = value #( active              = xsdbool( message-tdarmod = archive_mode-archive_only   or message-tdarmod = archive_mode-both )
+                          sap_object          = archive_index-sap_object
+                          object_id           = conv #( me->invoice_number )
+                          invoice_doc_type    = archive_index-ar_object
+                          attachment_doc_type = attachment_doc_type ).
 
-ENDCLASS.
+    " Fallbacks, falls in NACE > Ablagesystem nichts gepflegt ist
+    if result-sap_object is initial.
+      result-sap_object = default_sap_object.
+    endif.
+    if result-invoice_doc_type is initial.
+      result-invoice_doc_type = default_invoice_doc_type.
+    endif.
+  endmethod.
+
+endclass.

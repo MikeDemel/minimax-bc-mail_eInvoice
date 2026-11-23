@@ -1,308 +1,305 @@
-CLASS zcl_bc_mail_nast_invo_mail DEFINITION
-  PUBLIC
-  INHERITING FROM zcl_sm_sta_send_mail
-  FINAL
-  CREATE PUBLIC.
+class zcl_bc_mail_nast_invo_mail definition
+  public
+  inheriting from zcl_sm_sta_send_mail
+  final
+  create public.
 
-  PUBLIC SECTION.
-    TYPES: BEGIN OF attachment,
-             document TYPE fpcontent.
-             INCLUDE TYPE zsta_bo_dir_docs.
-    TYPES: END OF attachment.
-    TYPES attachment_list TYPE STANDARD TABLE OF attachment WITH EMPTY KEY.
+  public section.
+    types: begin of attachment,
+             document type fpcontent.
+             include type zsta_bo_dir_docs.
+           types: end of attachment.
+    types attachment_list type standard table of attachment with empty key.
 
-    TYPES: BEGIN OF mail_config,
-             sender_address      TYPE ad_smtpadr,
-             recipient_address   TYPE ad_smtpadr,
-             body_text_name      TYPE tdobname,
-             signature_text_name TYPE tdobname,
-             sales_organization  TYPE vkorg,
-             max_size_in_bytes   TYPE i,              " 0 = keine Pruefung
-           END OF mail_config.
+    types: begin of mail_config,
+             sender_address      type ad_smtpadr,
+             recipient_address   type ad_smtpadr,
+             body_text_name      type tdobname,
+             signature_text_name type tdobname,
+             sales_organization  type vkorg,
+             max_size_in_bytes   type i,              " 0 = keine Pruefung
+           end of mail_config.
 
-    TYPES: BEGIN OF archive_config,
-             active              TYPE abap_bool,
-             sap_object          TYPE saeanwdid,      " z. B. VBRK
-             object_id           TYPE saeobjid,       " Fakturanummer
-             invoice_doc_type    TYPE saeobjart,      " Dokumentart Zeile 1
-             attachment_doc_type TYPE saeobjart,      " Dokumentart ab Zeile 2
-           END OF archive_config.
+    types: begin of archive_config,
+             active              type abap_bool,
+             sap_object          type saeanwdid,      " z. B. VBRK
+             object_id           type saeobjid,       " Fakturanummer
+             invoice_doc_type    type saeobjart,      " Dokumentart Zeile 1
+             attachment_doc_type type saeobjart,      " Dokumentart ab Zeile 2
+           end of archive_config.
 
-    CONSTANTS placeholder_invoice_number TYPE typ_placeholder_d VALUE '&INVOICE_NUMBER&'.
+    constants placeholder_invoice_number type typ_placeholder_d value '&INVOICE_NUMBER&'.
 
     "! Rohgroesse aller Dokumente der zuletzt versendeten E-Mail in Byte
-    DATA total_size TYPE i READ-ONLY.
+    data total_size type i read-only.
 
-    METHODS constructor
-      IMPORTING mail_settings    TYPE mail_config
-                archive_settings TYPE archive_config OPTIONAL
-                archiver         TYPE REF TO zif_bc_mail_nast_invo_archive OPTIONAL.
+    methods constructor
+      importing mail_settings    type mail_config
+                archive_settings type archive_config optional
+                archiver         type ref to zif_bc_mail_nast_invo_archive optional.
 
     "! Versendet die Rechnung und registriert danach die Ablage.
     "! Zeile 1 = Rechnungs-PDF, ab Zeile 2 = Anhaenge. Nur PDF.
-    METHODS send_invoice
-      IMPORTING invoice_number TYPE vbeln_vf
-                documents      TYPE attachment_list
-      RAISING   zcx_sm_sta_send_mail
-                zcx_sm_sta_exception.
+    methods send_invoice
+      importing invoice_number type vbeln_vf
+                documents      type attachment_list
+      raising   zcx_sm_sta_send_mail.
 
     "! Nur ablegen, kein Versand (Archivierungsmodus 2)
-    METHODS archive_invoice
-      IMPORTING invoice_number TYPE vbeln_vf
-                documents      TYPE attachment_list
-      RAISING   zcx_sm_sta_send_mail.
+    methods archive_invoice
+      importing invoice_number type vbeln_vf
+                documents      type attachment_list
+      raising   zcx_sm_sta_send_mail.
 
     "! Rohgroesse in Byte; die MIME-Mail ist durch Base64 ca. 37 % groesser
-    CLASS-METHODS calculate_total_size
-      IMPORTING documents     TYPE attachment_list
-      RETURNING VALUE(result) TYPE i.
+    class-methods calculate_total_size
+      importing documents     type attachment_list
+      returning value(result) type i.
 
-  PROTECTED SECTION.
-    METHODS add_copy_to                REDEFINITION.
-    METHODS attach_documents           REDEFINITION.
-    METHODS before_send                REDEFINITION.
-    METHODS get_data                   REDEFINITION.
-    METHODS get_recipient              REDEFINITION.
-    METHODS get_recipient_address      REDEFINITION.
-    METHODS get_sender                 REDEFINITION.
-    METHODS get_textname_for_body      REDEFINITION.
-    METHODS get_textname_for_signature REDEFINITION.
-    METHODS is_commit_allowed          REDEFINITION.
-    METHODS set_placeholders           REDEFINITION.
-    METHODS set_recipient_address      REDEFINITION.
-    METHODS with_error_screen          REDEFINITION.
+  protected section.
+    methods add_copy_to                redefinition.
+    methods attach_documents           redefinition.
+    methods before_send                redefinition.
+    methods get_data                   redefinition.
+    methods get_recipient              redefinition.
+    methods get_recipient_address      redefinition.
+    methods get_sender                 redefinition.
+    methods get_textname_for_body      redefinition.
+    methods get_textname_for_signature redefinition.
 
-  PRIVATE SECTION.
-    CONSTANTS pdf_signature TYPE x LENGTH 5 VALUE '255044462D'. " %PDF-
-
-    DATA mail_settings    TYPE mail_config.
-    DATA archive_settings TYPE archive_config.
-    DATA archiver         TYPE REF TO zif_bc_mail_nast_invo_archive.
-    DATA invoice_number   TYPE vbeln_vf.
-    DATA documents        TYPE attachment_list.
-
-    METHODS add_attachment
-      IMPORTING content   TYPE xstring
-                file_name TYPE string
-      RAISING   cx_document_bcs.
-
-    METHODS archive_documents.
-
-    METHODS check_documents
-      RAISING zcx_sm_sta_send_mail.
-
-    METHODS check_size
-      RAISING zcx_sm_sta_send_mail.
-
-    CLASS-METHODS get_file_name
-      IMPORTING attachment    TYPE attachment
-      RETURNING VALUE(result) TYPE string.
-
-    CLASS-METHODS is_valid_pdf
-      IMPORTING attachment    TYPE attachment
-      RETURNING VALUE(result) TYPE abap_bool.
-
-ENDCLASS.
+    methods set_placeholders           redefinition.
+    methods set_recipient_address      redefinition.
 
 
+  private section.
+    constants pdf_signature type x length 5 value '255044462D'. " %PDF-
 
-CLASS zcl_bc_mail_nast_invo_mail IMPLEMENTATION.
+    data mail_settings    type mail_config.
+    data archive_settings type archive_config.
+    data archiver         type ref to zif_bc_mail_nast_invo_archive.
+    data invoice_number   type vbeln_vf.
+    data documents        type attachment_list.
 
-  METHOD constructor.
+    methods add_attachment
+      importing content   type xstring
+                file_name type string
+      raising   cx_document_bcs.
+
+    methods archive_documents.
+
+    methods check_documents
+      raising zcx_sm_sta_send_mail.
+
+    methods check_size
+      raising zcx_sm_sta_send_mail.
+
+    class-methods get_file_name
+      importing attachment    type attachment
+      returning value(result) type string.
+
+    class-methods is_valid_pdf
+      importing attachment    type attachment
+      returning value(result) type abap_bool.
+
+endclass.
+
+
+
+class zcl_bc_mail_nast_invo_mail implementation.
+
+  method constructor.
     super->constructor( ).
     me->mail_settings    = mail_settings.
     me->archive_settings = archive_settings.
-    me->archiver = COND #( WHEN archiver IS BOUND
-                           THEN archiver
-                           ELSE NEW zcl_bc_mail_nast_invo_archive( ) ).
+    me->archiver = cond #( when archiver is bound
+                           then archiver
+                           else new zcl_bc_mail_nast_invo_archive( ) ).
     " Wird von BUILD_HTML_BODY fuer die Signaturlogik benoetigt
     sales_org_number = mail_settings-sales_organization.
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD send_invoice.
+  method send_invoice.
     me->invoice_number = invoice_number.
     me->documents      = documents.
     total_size = calculate_total_size( documents ).
 
-    send_mail( ).
+    try.
+        send_mail( ).
+      catch zcx_sm_sta_exception into data(lox_sm_sta_exception).
+        raise exception type zcx_sm_sta_send_mail
+          exporting
+            mi_messages = lox_sm_sta_exception->mi_messages.
+    endtry.
 
     " Erst nach erfolgreichem Versand registrieren: schlaegt der Versand fehl,
     " wird nichts abgelegt und eine Wiederholung erzeugt keine Dubletten.
     archive_documents( ).
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD archive_invoice.
+  method archive_invoice.
     me->invoice_number = invoice_number.
     me->documents      = documents.
     total_size = calculate_total_size( documents ).
 
     check_documents( ).
     archive_documents( ).
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD calculate_total_size.
-    result = REDUCE i( INIT sum = 0
-                       FOR document IN documents
-                       NEXT sum = sum + xstrlen( document-document ) ).
-  ENDMETHOD.
+  method calculate_total_size.
+    result = reduce i( init sum = 0
+                       for document in documents
+                       next sum = sum + xstrlen( document-document ) ).
+  endmethod.
 
 
-  METHOD get_data ##NEEDED.
+  method get_data ##NEEDED.
     " Alle Daten kommen ueber SEND_INVOICE
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD add_copy_to ##NEEDED.
+  method add_copy_to ##NEEDED.
     " Keine Kopieempfaenger vorgesehen
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD get_sender.
-    IF mail_settings-sender_address IS INITIAL.
+  method get_sender.
+    if mail_settings-sender_address is initial.
       ro_sender = super->get_sender( ).
-    ELSE.
+    else.
       ro_sender = cl_cam_address_bcs=>create_internet_address( mail_settings-sender_address ).
-    ENDIF.
-  ENDMETHOD.
+    endif.
+  endmethod.
 
 
-  METHOD get_recipient.
+  method get_recipient.
     ro_recipient = cl_cam_address_bcs=>create_internet_address( get_recipient_address( ) ).
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD get_recipient_address.
-    IF mail_settings-recipient_address IS INITIAL.
+  method get_recipient_address.
+    if mail_settings-recipient_address is initial.
       " Empfehlung: eigene Text-ID "keine Empfaengeradresse"
-      RAISE EXCEPTION TYPE zcx_sm_sta_send_mail
-        EXPORTING textid = zcx_sm_sta_send_mail=>zcx_error.
-    ENDIF.
+      raise exception type zcx_sm_sta_send_mail
+        exporting
+          textid = zcx_sm_sta_send_mail=>zcx_error.
+    endif.
     rd_email_string = mail_settings-recipient_address.
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD set_recipient_address.
+  method set_recipient_address.
     mail_settings-recipient_address = id_email.
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD get_textname_for_body.
+  method get_textname_for_body.
     rd_itf_textname = mail_settings-body_text_name.
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD get_textname_for_signature.
+  method get_textname_for_signature.
     rd_itf_textname = mail_settings-signature_text_name.
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD set_placeholders.
-    ci_placeholder = VALUE #( BASE ci_placeholder
+  method set_placeholders.
+    ci_placeholder = value #( base ci_placeholder
                               ( placeholder = placeholder_invoice_number
-                                value       = |{ invoice_number ALPHA = OUT }| ) ).
-  ENDMETHOD.
+                                value       = |{ invoice_number alpha = out }| ) ).
+  endmethod.
 
 
-  METHOD is_commit_allowed.
-    " Im NAST-Kontext committet RSNAST00/VF31 bzw. die Verbuchung (Zeitpunkt 4)
-    result = abap_false.
-  ENDMETHOD.
-
-
-  METHOD with_error_screen.
-    " Kein Dialog: Batch (RSNAST00) bzw. Verbuchung (Zeitpunkt 4)
-    result = abap_false.
-  ENDMETHOD.
-
-
-  METHOD before_send.
+  method before_send.
     check_documents( ).
     check_size( ).
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD attach_documents.
+  method attach_documents.
     " II_PDF_DATA der Basisklasse wird bewusst nicht verwendet
-    LOOP AT documents REFERENCE INTO DATA(document).
+    loop at documents reference into data(document).
       add_attachment( content   = document->document
                       file_name = get_file_name( document->* ) ).
-    ENDLOOP.
-  ENDMETHOD.
+    endloop.
+  endmethod.
 
 
-  METHOD add_attachment.
+  method add_attachment.
     mo_document->add_attachment(
         i_attachment_type    = 'PDF'
-        i_attachment_subject = CONV so_obj_des( file_name )
-        i_attachment_size    = CONV so_obj_len( xstrlen( content ) )
+        i_attachment_subject = conv so_obj_des( file_name )
+        i_attachment_size    = conv so_obj_len( xstrlen( content ) )
         i_att_content_hex    = cl_document_bcs=>xstring_to_solix( content )
-        i_attachment_header  = VALUE soli_tab( ( |{ cl_bcs_objhead=>gc_filename }={ file_name }| ) ) ).
-  ENDMETHOD.
+        i_attachment_header  = value soli_tab( ( |{ cl_bcs_objhead=>gc_filename }={ file_name }| ) ) ).
+  endmethod.
 
 
-  METHOD check_documents.
-    IF documents IS INITIAL.
-      RAISE EXCEPTION TYPE zcx_sm_sta_send_mail
-        EXPORTING textid = zcx_sm_sta_send_mail=>zcx_error.
-    ENDIF.
+  method check_documents.
+    if documents is initial.
+      raise exception type zcx_sm_sta_send_mail
+        exporting
+          textid = zcx_sm_sta_send_mail=>zcx_error.
+    endif.
 
-    LOOP AT documents REFERENCE INTO DATA(document).
-      IF is_valid_pdf( document->* ) = abap_false.
+    loop at documents reference into data(document).
+      if is_valid_pdf( document->* ) = abap_false.
         " Empfehlung: eigene Text-ID "kein gueltiges PDF"
-        RAISE EXCEPTION TYPE zcx_sm_sta_send_mail
-          EXPORTING textid = zcx_sm_sta_send_mail=>zcx_error.
-      ENDIF.
-    ENDLOOP.
-  ENDMETHOD.
+        raise exception type zcx_sm_sta_send_mail
+          exporting
+            textid = zcx_sm_sta_send_mail=>zcx_error.
+      endif.
+    endloop.
+  endmethod.
 
 
-  METHOD is_valid_pdf.
-    IF to_lower( condense( attachment-document_type ) ) <> `application/pdf`.
-      RETURN.
-    ENDIF.
-    IF xstrlen( attachment-document ) < 5.
-      RETURN.
-    ENDIF.
+  method is_valid_pdf.
+    if to_lower( condense( attachment-document_type ) ) <> `application/pdf`.
+      return.
+    endif.
+    if xstrlen( attachment-document ) < 5.
+      return.
+    endif.
     result = xsdbool( attachment-document(5) = pdf_signature ).
-  ENDMETHOD.
+  endmethod.
 
 
-  METHOD check_size.
-    IF mail_settings-max_size_in_bytes > 0 AND total_size > mail_settings-max_size_in_bytes.
+  method check_size.
+    if mail_settings-max_size_in_bytes > 0 and total_size > mail_settings-max_size_in_bytes.
       " Empfehlung: eigene Text-ID "E-Mail zu gross"
-      RAISE EXCEPTION TYPE zcx_sm_sta_send_mail
-        EXPORTING textid = zcx_sm_sta_send_mail=>zcx_error.
-    ENDIF.
-  ENDMETHOD.
+      raise exception type zcx_sm_sta_send_mail
+        exporting
+          textid = zcx_sm_sta_send_mail=>zcx_error.
+    endif.
+  endmethod.
 
 
-  METHOD get_file_name.
+  method get_file_name.
     result = condense( attachment-document_title ).
-    IF result IS INITIAL.
-      result = |{ 'Dokument'(001) }_{ attachment-document_nr ALPHA = OUT }|.
-    ENDIF.
-    IF NOT matches( val = to_lower( result ) regex = `.*\.pdf` ).
+    if result is initial.
+      result = |{ 'Dokument'(001) }_{ attachment-document_nr alpha = out }|.
+    endif.
+    if not matches( val = to_lower( result ) regex = `.*\.pdf` ).
       result = |{ result }.pdf|.
-    ENDIF.
-  ENDMETHOD.
+    endif.
+  endmethod.
 
 
-  METHOD archive_documents.
-    IF archive_settings-active = abap_false.
-      RETURN.
-    ENDIF.
+  method archive_documents.
+    if archive_settings-active = abap_false.
+      return.
+    endif.
 
     archiver->archive(
         sap_object = archive_settings-sap_object
         object_id  = archive_settings-object_id
-        documents  = VALUE #( FOR document IN documents INDEX INTO index
-                              ( ar_object = COND #( WHEN index = 1
-                                                    THEN archive_settings-invoice_doc_type
-                                                    ELSE archive_settings-attachment_doc_type )
+        documents  = value #( for document in documents index into index
+                              ( ar_object = cond #( when index = 1
+                                                    then archive_settings-invoice_doc_type
+                                                    else archive_settings-attachment_doc_type )
                                 content   = document-document ) ) ).
-  ENDMETHOD.
+  endmethod.
 
-ENDCLASS.
+endclass.
