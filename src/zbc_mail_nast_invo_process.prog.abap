@@ -22,9 +22,13 @@ tables: nast,        " Nachrichtenstatus
 class lcl_invoice_mail definition final.
   public section.
     types: begin of processing_result,
-             invoice_number type vbeln_vf,
-             sent           type abap_bool,
-             total_size     type i,
+             invoice_number    type vbeln_vf,
+             sent              type abap_bool,
+             total_size        type i,
+             archive_mode      type nast-tdarmod,
+             archive_requested type abap_bool,
+             archive_doc_type  type saeobjart,
+             archive_doc_count type i,
            end of processing_result.
 
     methods constructor
@@ -134,6 +138,17 @@ form entry using return_code like sy-subrc
         msg_handler->add_info_message( id_id = 'ZBC_MAIL_NAST_INVO' id_number = '013' id_v1 = result-invoice_number  ).
         if 1 = 2. message s013(zbc_mail_nast_invo) with space . endif.
       endif.
+
+      " Die Ablage selbst laeuft erst nach dem COMMIT per tRFC; Fehler stehen in SM58
+      if result-archive_requested = abap_true.
+        msg_handler->add_info_message( id_id = 'ZBC_MAIL_NAST_INVO' id_number = '017' id_v1 = result-invoice_number
+                                       id_v2_i = result-archive_doc_count id_v3 = result-archive_doc_type ).
+        if 1 = 2. message s017(zbc_mail_nast_invo) with space space space. endif.
+      else.
+        msg_handler->add_info_message( id_id = 'ZBC_MAIL_NAST_INVO' id_number = '018' id_v1 = result-invoice_number
+                                       id_v2 = result-archive_mode ).
+        if 1 = 2. message s018(zbc_mail_nast_invo) with space space. endif.
+      endif.
       lcl_nast_protocol=>add_logger( msg_handler ).
 
     catch cx_root into data(lox_root).
@@ -188,11 +203,18 @@ class lcl_invoice_mail implementation.
   method process.
     data(documents) = get_documents(  ).
 
-    result-invoice_number = me->invoice_number.
-    result-total_size     = zcl_bc_mail_nast_invo_mail=>calculate_total_size( documents ).
+    data(archive_settings) = build_archive_settings( ).
+
+    result-invoice_number    = me->invoice_number.
+    result-total_size        = zcl_bc_mail_nast_invo_mail=>calculate_total_size( documents ).
+    result-archive_mode      = message-tdarmod.
+    result-archive_requested = archive_settings-active.
+    result-archive_doc_type  = archive_settings-doc_type.
+    " Rechnung + ein (ggf. zusammengefuehrtes) Dokument mit den Anhaengen
+    result-archive_doc_count = cond #( when lines( documents ) > 1 then 2 else 1 ).
 
     data(mail) = new zcl_bc_mail_nast_invo_mail( mail_settings    = build_mail_settings(  )
-                                                 archive_settings = build_archive_settings(  ) ).
+                                                 archive_settings = archive_settings ).
 
     if message-tdarmod = archive_mode-archive_only.
       mail->archive_invoice( invoice_number = me->invoice_number

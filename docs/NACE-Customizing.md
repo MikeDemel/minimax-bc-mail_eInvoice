@@ -18,7 +18,7 @@ Archivierungsmodus 2 (nur Ablegen) wird vom Programm unterstützt: Dann wird abg
 
 ## ArchiveLink
 
-- Im tRFC `Z_BC_MAIL_NAST_INVO_ARCHIVE` wird die Rechnung unverändert abgelegt; die Anhänge werden über ADS (`CL_RSPO_PDF_MERGE`) zu einem PDF zusammengeführt und als zweites Dokument abgelegt (bei genau einem Anhang ohne Merge). Beschreibung und Dateiname (`TOAAT`) kommen aus den Meldungen 015 „Rechnung &1“ und 016 „Anlagen zu Rechnung &1“ und erscheinen in der Anlagenliste statt des Dokumentart-Textes. Das Rechnungs-PDF aus `/IX2/EINV_GET_PDF` lässt sich nicht mergen (RC 107). Beide Dokumente mit der Dokumentart aus NACE > Ablagesystem abgelegt (Fallback `ZEDI_INVOI`). Objekt-ID aus `TOA_DARA-OBJECT_ID`, sonst Standardaufbau `NAST-OBJKY` (30 Stellen, mit Leerzeichen) + `NAST-OPTARCNR`, z. B. `9111001807` + `0018190440`. Damit ist jede Ablage eindeutig einer Nachricht zugeordnet und wird aus der Nachricht heraus gefunden.
+- Im tRFC `Z_BC_MAIL_NAST_INVO_ARCHIVE` wird die Rechnung unverändert abgelegt; die Anhänge werden über ADS (`CL_RSPO_PDF_MERGE`) zu einem PDF zusammengeführt und als zweites Dokument abgelegt (bei genau einem Anhang ohne Merge). Vor der Ablage werden beide Dokumente über `CL_FP_CONV_PDFA` nach PDF/A-3b konvertiert; schlägt die Konvertierung fehl, wird das Original abgelegt. Beschreibung und Dateiname (`TOAAT`) kommen aus den Meldungen 015 „Rechnung &1“ und 016 „Anlagen zu Rechnung &1“ und erscheinen in der Anlagenliste statt des Dokumentart-Textes. Das Rechnungs-PDF aus `/IX2/EINV_GET_PDF` lässt sich nicht mergen (RC 107). Beide Dokumente mit der Dokumentart aus NACE > Ablagesystem abgelegt (Fallback `ZEDI_INVOI`). Objekt-ID aus `TOA_DARA-OBJECT_ID`, sonst Standardaufbau `NAST-OBJKY` (30 Stellen, mit Leerzeichen) + `NAST-OPTARCNR`, z. B. `9111001807` + `0018190440`. Damit ist jede Ablage eindeutig einer Nachricht zugeordnet und wird aus der Nachricht heraus gefunden.
 - OAC3: `VBRK` / `ZEDI_INVOI` (bzw. die eingetragene Dokumentart, Repository wie Druckprozess, z. B. `V4`) mit dem Content-Repository verknüpfen.
 - Schlägt das Zusammenführen der Anhänge fehl (Meldung `ZBC_MAIL_NAST_INVO` 014), wird nichts abgelegt; der tRFC bleibt in SM58 und kann dort wiederholt werden. Die E-Mail ist zu dem Zeitpunkt bereits versendet.
 
@@ -39,7 +39,7 @@ E-Mail-Adresse der Verkaufsorganisation (OVX5, Adresse). Ohne Adresse versendet 
 
 - RSNAST00 periodisch mit Variante: Applikation V3, Nachrichtenart ZEIM, Medium 5.
 - SAPconnect-Sendejob (SCOT).
-- SOST für den Versand, SM58 für die Ablage-tRFCs (`Z_BC_MAIL_NAST_INVO_ARCHIVE`), NAST-Protokoll in VF03.
+- SOST für den Versand, SM58 für die Ablage-tRFCs (`Z_BC_MAIL_NAST_INVO_ARCHIVE`), NAST-Protokoll in VF03. Das Protokoll zeigt, ob die Ablage angestoßen wurde (Meldung 017 mit Anzahl Dokumente und Dokumentart) oder wegen des Archivierungsmodus unterblieb (018). Ob sie erfolgreich war, zeigt erst SM58 bzw. die Anlagenliste.
 
 ## Versandzeitpunkt 4
 

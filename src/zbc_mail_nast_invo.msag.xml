@@ -50,6 +50,18 @@
      <MSGNR>016</MSGNR>
      <TEXT>Anlagen zu Rechnung &amp;1</TEXT>
     </T100>
+    <T100>
+     <SPRSL>D</SPRSL>
+     <ARBGB>ZBC_MAIL_NAST_INVO</ARBGB>
+     <MSGNR>017</MSGNR>
+     <TEXT>Ablage zu Faktura &amp;1 angestossen: &amp;2 Dokument(e), Dokumentart &amp;3</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>D</SPRSL>
+     <ARBGB>ZBC_MAIL_NAST_INVO</ARBGB>
+     <MSGNR>018</MSGNR>
+     <TEXT>Keine Ablage zu Faktura &amp;1 (Archivierungsmodus &amp;2)</TEXT>
+    </T100>
    </T100>
   </asx:values>
  </asx:abap>

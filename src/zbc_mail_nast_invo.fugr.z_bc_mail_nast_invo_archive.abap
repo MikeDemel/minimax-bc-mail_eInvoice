@@ -11,6 +11,7 @@ FUNCTION z_bc_mail_nast_invo_archive.
   " Zeile 1 (Rechnung) wird unveraendert abgelegt, die Anhaenge ab Zeile 2
   " zusammengefuehrt als zweites Dokument. Die Rechnung selbst wird nicht
   " gemergt: Das PDF aus /IX2/EINV_GET_PDF lehnt ADS ab (RC 107).
+  " Beide Dokumente werden vor der Ablage nach PDF/A-3b konvertiert.
   " Beschreibung und Dateiname landen in TOAAT und erscheinen in der
   " Anlagenliste statt des Dokumentart-Textes.
   " Fehler brechen die tRFC-LUW ab: Eintrag in SM58, dort wiederholbar.
@@ -77,6 +78,19 @@ FUNCTION z_bc_mail_nast_invo_archive.
   ENDIF.
 
   LOOP AT archive_documents REFERENCE INTO DATA(archive_document).
+    " Fuer die Langzeitarchivierung nach PDF/A-3b konvertieren. Schlaegt das
+    " fehl, wird das Original abgelegt: Die Ablage ist wichtiger als das Format.
+    TRY.
+        DATA(pdfa_content) = NEW cl_fp_conv_pdfa( )->run_convert_pdfa(
+                                 iv_pdf     = archive_document->content
+                                 iv_pdfnorm = if_fp_pdf_norm=>pdf_a3b ).
+        IF pdfa_content IS NOT INITIAL.
+          archive_document->content = pdfa_content.
+        ENDIF.
+      CATCH cx_fp_conv ##NO_HANDLER.
+    ENDTRY.
+    CLEAR pdfa_content.
+
     " Typ von FLENGTH: LIKE SAPB-LENGTH
     DATA(file_length) = CONV sapb-length( xstrlen( archive_document->content ) ).
 
