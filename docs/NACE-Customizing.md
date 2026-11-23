@@ -18,9 +18,9 @@ Archivierungsmodus 2 (nur Ablegen) wird vom Programm unterstützt: Dann wird abg
 
 ## ArchiveLink
 
-- Rechnung und alle Anhänge werden im tRFC `Z_BC_MAIL_NAST_INVO_ARCHIVE` über ADS (`CL_RSPO_PDF_MERGE`) zu einem PDF zusammengeführt und als ein Dokument mit der Dokumentart aus NACE > Ablagesystem abgelegt (Fallback `ZEDI_INVOI`). Objekt-ID aus `TOA_DARA-OBJECT_ID`, sonst Standardaufbau `NAST-OBJKY` (30 Stellen, mit Leerzeichen) + `NAST-OPTARCNR`, z. B. `9111001807` + `0018190440`. Damit ist jede Ablage eindeutig einer Nachricht zugeordnet und wird aus der Nachricht heraus gefunden.
+- Im tRFC `Z_BC_MAIL_NAST_INVO_ARCHIVE` wird die Rechnung unverändert abgelegt; die Anhänge werden über ADS (`CL_RSPO_PDF_MERGE`) zu einem PDF zusammengeführt und als zweites Dokument abgelegt (bei genau einem Anhang ohne Merge). Das Rechnungs-PDF aus `/IX2/EINV_GET_PDF` lässt sich nicht mergen (RC 107). Beide Dokumente mit der Dokumentart aus NACE > Ablagesystem abgelegt (Fallback `ZEDI_INVOI`). Objekt-ID aus `TOA_DARA-OBJECT_ID`, sonst Standardaufbau `NAST-OBJKY` (30 Stellen, mit Leerzeichen) + `NAST-OPTARCNR`, z. B. `9111001807` + `0018190440`. Damit ist jede Ablage eindeutig einer Nachricht zugeordnet und wird aus der Nachricht heraus gefunden.
 - OAC3: `VBRK` / `ZEDI_INVOI` (bzw. die eingetragene Dokumentart, Repository wie Druckprozess, z. B. `V4`) mit dem Content-Repository verknüpfen.
-- Schlägt das Zusammenführen fehl (Meldung `ZBC_MAIL_NAST_INVO` 014), bleibt der tRFC in SM58 und kann dort wiederholt werden. Die E-Mail ist zu dem Zeitpunkt bereits versendet.
+- Schlägt das Zusammenführen der Anhänge fehl (Meldung `ZBC_MAIL_NAST_INVO` 014), wird nichts abgelegt; der tRFC bleibt in SM58 und kann dort wiederholt werden. Die E-Mail ist zu dem Zeitpunkt bereits versendet.
 
 ## Texte (SO10, Text-ID ST)
 

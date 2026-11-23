@@ -23,8 +23,8 @@ Mailversand aus der Nachrichtensteuerung (NAST) zu Rechnungen: Nachrichtenart **
   Verkaufsorganisation, Body / Signatur aus SO10-Texten `ZBC_MAIL_NAST_INVO_BODY_<VKORG>` /
   `ZCA_<BUKRS>_SIGNATURE`.
 - Nach erfolgreichem Versand ArchiveLink-Ablage per tRFC (`Z_BC_MAIL_NAST_INVO_ARCHIVE`):
-  Rechnung und Anhänge werden über `CL_RSPO_PDF_MERGE` (ADS) zu einem PDF zusammengeführt und
-  mit einer Dokumentart (NACE > Ablagesystem, Fallback `ZEDI_INVOI` wie im bisherigen Druckprozess) per `ARCHIV_CREATE_TABLE`
+  Rechnung (Zeile 1) wird unverändert abgelegt, die Anhänge werden über `CL_RSPO_PDF_MERGE` (ADS) zu einem PDF zusammengeführt und als zweites Dokument
+  abgelegt (das Rechnungs-PDF aus `/IX2/EINV_GET_PDF` lehnt ADS mit RC 107 ab). Beide mit einer Dokumentart (NACE > Ablagesystem, Fallback `ZEDI_INVOI` wie im bisherigen Druckprozess) per `ARCHIV_CREATE_TABLE`
   abgelegt. Archivierungsmodus 2 = nur ablegen, kein Versand.
 - Protokoll: Meldungen sammeln über `ZCL_SM_STA_MSG_HANDLER_FACTORY=>get_instance( )` (liefert
   immer eine neue Instanz), dann per `NAST_PROTOCOL_UPDATE` ins NAST-Protokoll. Eigene Meldungen

@@ -8,7 +8,7 @@ Mailversand aus NAST zu Rechnungen (Nachrichtenart ZEIM): Rechnungs-PDF und weit
 2. Rechnungs-PDF über `/IX2/EINV_GET_PDF`. Der Baustein bekommt eine eigene NAST (Nachrichtenart `ZIF_STA_SD_INV_NAST=>CO_MSG_TYPE_INVOICE_MAIL`) und den TNAPR-Eintrag der Druckausgabe (Medium `CO_TRANS_MEDIUM_PRINT_OUTPUT`). Vorher wird `ZCL_IDOC_INVO_JOUBINI_MODE_FAC` auf „nur Anhang“ gesetzt.
 3. Weitere PDF-Anhänge über `ZCL_IDOC_INVO_JOUBINI_ATTA_FAC=>GET_INSTANCE( )->GET_MAIL_ATTACHMENTS( )`.
 4. Empfänger aus `ZBC_IDOC_JOU_ACR-EMAIL` zum Nachrichtenpartner (`NAST-PARNR`), Absender aus der Adresse der Verkaufsorganisation.
-5. Versand per BCS über `ZCL_BC_MAIL_NAST_INVO_MAIL`, danach Ablage per tRFC: Rechnung und Anhänge werden zu einem PDF zusammengeführt (`CL_RSPO_PDF_MERGE`, ADS) und als ein Dokument abgelegt.
+5. Versand per BCS über `ZCL_BC_MAIL_NAST_INVO_MAIL`, danach Ablage per tRFC: die Rechnung wird unverändert abgelegt, die Anhänge werden zu einem PDF zusammengeführt (`CL_RSPO_PDF_MERGE`, ADS) und als zweites Dokument abgelegt.
 6. Meldungen über `ZCL_SM_STA_MSG_HANDLER_FACTORY` ins NAST-Protokoll.
 
 ## Objekte

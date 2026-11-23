@@ -2,7 +2,8 @@ INTERFACE zif_bc_mail_nast_invo_archive
   PUBLIC.
 
   "! Registriert die ArchiveLink-Ablage der Dokumente.
-  "! Alle Dokumente werden zu einem PDF zusammengefuehrt und mit
+  "! Zeile 1 (Rechnung) wird unveraendert abgelegt, die Anhaenge ab Zeile 2
+  "! werden zu einem PDF zusammengefuehrt; beide mit
   "! Dokumentart AR_OBJECT abgelegt.
   "! Die Ausfuehrung erfolgt nach dem COMMIT der rufenden LUW.
   METHODS archive

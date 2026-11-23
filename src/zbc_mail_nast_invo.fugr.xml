@@ -44,12 +44,12 @@
       <RSFDO>
        <PARAMETER>AR_OBJECT</PARAMETER>
        <KIND>P</KIND>
-       <STEXT>Dokumentart des zusammengefuehrten PDF</STEXT>
+       <STEXT>Dokumentart (alle Dokumente)</STEXT>
       </RSFDO>
       <RSFDO>
        <PARAMETER>DOCUMENTS</PARAMETER>
        <KIND>P</KIND>
-       <STEXT>Zusammenzufuehrende PDF-Dokumente</STEXT>
+       <STEXT>Zeile 1 Rechnung, dann Anlagen</STEXT>
       </RSFDO>
      </DOCUMENTATION>
     </item>
