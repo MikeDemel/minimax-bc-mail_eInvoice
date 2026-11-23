@@ -43,10 +43,9 @@ class lcl_invoice_mail definition final.
            end of invoice_header.
 
     constants:
-      " Eigene Dokumentart (OAC2, Dokumentklasse PDF, OAC3 mit VBRK verknuepft)
-      attachment_doc_type      type saeobjart value 'ZSDINVATT',
       " Fallback, falls in NACE > Ablagesystem keine Dokumentart gepflegt ist
-      default_invoice_doc_type type saeobjart value 'SDOINVOICE',
+      " (wie im bisherigen Druckprozess)
+      default_doc_type         type saeobjart value 'ZEDI_INVOI',
       default_sap_object       type saeanwdid value 'VBRK',
       " Rohgroesse; die MIME-Mail ist durch Base64 ca. 37 % groesser
       max_size_in_bytes        type i value 10485760,
@@ -91,6 +90,9 @@ class lcl_invoice_mail definition final.
 
     methods build_archive_settings
       returning value(result) type zcl_bc_mail_nast_invo_mail=>archive_config.
+
+    methods build_object_id
+      returning value(result) type saeobjid.
 
 endclass.
 
@@ -320,20 +322,29 @@ class lcl_invoice_mail implementation.
 
 
   method build_archive_settings.
-    " SAP_OBJECT und AR_OBJECT kommen aus NACE > Ablagesystem (via TOA_DARA)
+    " SAP_OBJECT, OBJECT_ID und AR_OBJECT kommen aus der Nachrichtensteuerung (via TOA_DARA)
     result = value #( active              = xsdbool( message-tdarmod = archive_mode-archive_only   or message-tdarmod = archive_mode-both )
                           sap_object          = archive_index-sap_object
-                          object_id           = conv #( me->invoice_number )
-                          invoice_doc_type    = archive_index-ar_object
-                          attachment_doc_type = attachment_doc_type ).
+                          object_id           = archive_index-object_id
+                          doc_type            = archive_index-ar_object ).
 
-    " Fallbacks, falls in NACE > Ablagesystem nichts gepflegt ist
+    " Fallbacks, falls die Nachrichtensteuerung TOA_DARA nicht gefuellt hat
     if result-sap_object is initial.
       result-sap_object = default_sap_object.
     endif.
-    if result-invoice_doc_type is initial.
-      result-invoice_doc_type = default_invoice_doc_type.
+    if result-object_id is initial.
+      result-object_id = build_object_id( ).
     endif.
+    if result-doc_type is initial.
+      result-doc_type = default_doc_type.
+    endif.
+  endmethod.
+
+
+  method build_object_id.
+    " Standardaufbau: OBJKY (30 Zeichen, mit Leerzeichen) + OPTARCNR.
+    " Ohne RESPECTING BLANKS fielen die Leerzeichen am Ende von OBJKY weg.
+    concatenate message-objky message-optarcnr into result respecting blanks.
   endmethod.
 
 endclass.

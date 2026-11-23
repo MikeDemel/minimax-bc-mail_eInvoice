@@ -8,7 +8,7 @@ Nachrichtenart ZEIM am einfachsten als Kopie der bestehenden Rechnungsnachricht 
 |---|---|
 | Allgemeine Daten | Zugriffsfolge wie Rechnungsnachricht, Zugriff auf Konditionen aktiv |
 | Vorschlagswerte | Versandzeitpunkt 1, Sendemedium 5 (Externe Sendung), Partnerrolle RE |
-| Ablagesystem | Ablagemodus 3 (Drucken und Ablegen), Dokumentart SDOINVOICE oder eigene Z-Dokumentart mit Klasse PDF |
+| Ablagesystem | Ablagemodus 3 (Drucken und Ablegen), Dokumentart `ZEDI_INVOI` wie beim bisherigen Druckprozess |
 | Verarbeitungsroutinen | Medium 5, Programm `ZBC_MAIL_NAST_INVO_PROCESS`, FORM-Routine `ENTRY`. Das Formular wird hier nicht ausgewertet: Das PDF erzeugt `/IX2/EINV_GET_PDF` mit dem TNAPR-Eintrag der Druckausgabe (Nachrichtenart `ZIF_STA_SD_INV_NAST=>CO_MSG_TYPE_INVOICE_MAIL`, Medium `CO_TRANS_MEDIUM_PRINT_OUTPUT`), der dafür gepflegt sein muss |
 | Partnerrollen | Medium 5 mit Partnerrolle RE |
 | Nachrichtenschema | ZEIM ins Faktura-Schema aufnehmen, Bedingung wie RD00 (Standard: 62) |
@@ -18,9 +18,9 @@ Archivierungsmodus 2 (nur Ablegen) wird vom Programm unterstützt: Dann wird abg
 
 ## ArchiveLink
 
-- OAC2: Dokumentart `ZSDINVATT` (Dokumentklasse PDF) für die Anhänge anlegen.
-- OAC3: `VBRK` / `SDOINVOICE` und `VBRK` / `ZSDINVATT` mit dem Content-Repository verknüpfen.
-- Prüfen, ob `SDOINVOICE` die Dokumentklasse PDF hat. Falls nicht, eigene Dokumentart mit Klasse PDF anlegen und in NACE eintragen.
+- Rechnung und alle Anhänge werden im tRFC `Z_BC_MAIL_NAST_INVO_ARCHIVE` über ADS (`CL_RSPO_PDF_MERGE`) zu einem PDF zusammengeführt und als ein Dokument mit der Dokumentart aus NACE > Ablagesystem abgelegt (Fallback `ZEDI_INVOI`). Objekt-ID aus `TOA_DARA-OBJECT_ID`, sonst Standardaufbau `NAST-OBJKY` (30 Stellen, mit Leerzeichen) + `NAST-OPTARCNR`, z. B. `9111001807` + `0018190440`. Damit ist jede Ablage eindeutig einer Nachricht zugeordnet und wird aus der Nachricht heraus gefunden.
+- OAC3: `VBRK` / `ZEDI_INVOI` (bzw. die eingetragene Dokumentart, Repository wie Druckprozess, z. B. `V4`) mit dem Content-Repository verknüpfen.
+- Schlägt das Zusammenführen fehl (Meldung `ZBC_MAIL_NAST_INVO` 014), bleibt der tRFC in SM58 und kann dort wiederholt werden. Die E-Mail ist zu dem Zeitpunkt bereits versendet.
 
 ## Texte (SO10, Text-ID ST)
 

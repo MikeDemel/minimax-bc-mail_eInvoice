@@ -8,7 +8,7 @@ Mailversand aus NAST zu Rechnungen (Nachrichtenart ZEIM): Rechnungs-PDF und weit
 2. Rechnungs-PDF über `/IX2/EINV_GET_PDF`. Der Baustein bekommt eine eigene NAST (Nachrichtenart `ZIF_STA_SD_INV_NAST=>CO_MSG_TYPE_INVOICE_MAIL`) und den TNAPR-Eintrag der Druckausgabe (Medium `CO_TRANS_MEDIUM_PRINT_OUTPUT`). Vorher wird `ZCL_IDOC_INVO_JOUBINI_MODE_FAC` auf „nur Anhang“ gesetzt.
 3. Weitere PDF-Anhänge über `ZCL_IDOC_INVO_JOUBINI_ATTA_FAC=>GET_INSTANCE( )->GET_MAIL_ATTACHMENTS( )`.
 4. Empfänger aus `ZBC_IDOC_JOU_ACR-EMAIL` zum Nachrichtenpartner (`NAST-PARNR`), Absender aus der Adresse der Verkaufsorganisation.
-5. Versand per BCS über `ZCL_BC_MAIL_NAST_INVO_MAIL`, danach Ablage per tRFC.
+5. Versand per BCS über `ZCL_BC_MAIL_NAST_INVO_MAIL`, danach Ablage per tRFC: Rechnung und Anhänge werden zu einem PDF zusammengeführt (`CL_RSPO_PDF_MERGE`, ADS) und als ein Dokument abgelegt.
 6. Meldungen über `ZCL_SM_STA_MSG_HANDLER_FACTORY` ins NAST-Protokoll.
 
 ## Objekte
@@ -19,8 +19,8 @@ Mailversand aus NAST zu Rechnungen (Nachrichtenart ZEIM): Rechnungs-PDF und weit
 | `ZCL_BC_MAIL_NAST_INVO_MAIL` | Klasse | E-Mail-Versand, erbt von `ZCL_SM_STA_SEND_MAIL` |
 | `ZIF_BC_MAIL_NAST_INVO_ARCHIVE` | Interface | Ablage (für Unit-Tests mockbar) |
 | `ZCL_BC_MAIL_NAST_INVO_ARCHIVE` | Klasse | Ablage per tRFC |
-| `ZBC_MAIL_NAST_INVO` / `Z_BC_MAIL_NAST_INVO_ARCHIVE` | Funktionsgruppe / RFC-Baustein | Ablage über `ARCHIV_CREATE_TABLE` |
-| `ZBC_MAIL_NAST_INVO_ARC_DOC` / `ZBC_MAIL_NAST_INVO_ARC_DOCS` | Struktur / Tabellentyp | Dokumente für die Ablage |
+| `ZBC_MAIL_NAST_INVO` / `Z_BC_MAIL_NAST_INVO_ARCHIVE` | Funktionsgruppe / RFC-Baustein | PDFs zusammenführen, Ablage über `ARCHIV_CREATE_TABLE` |
+| `ZBC_MAIL_NAST_INVO_ARC_DOC` / `ZBC_MAIL_NAST_INVO_ARC_DOCS` | Struktur / Tabellentyp | PDF-Inhalte für die Ablage (`CONTENT`) |
 | `ZBC_MAIL_NAST_INVO` | Nachrichtenklasse | Meldungen für NAST-Protokoll und SM58 |
 
 ## Voraussetzungen

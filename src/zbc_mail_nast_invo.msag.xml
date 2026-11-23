@@ -32,6 +32,12 @@
      <MSGNR>013</MSGNR>
      <TEXT>Faktura &amp;1 nur abgelegt (Archivierungsmodus 2), kein Versand</TEXT>
     </T100>
+    <T100>
+     <SPRSL>D</SPRSL>
+     <ARBGB>ZBC_MAIL_NAST_INVO</ARBGB>
+     <MSGNR>014</MSGNR>
+     <TEXT>PDF-Zusammenfuehrung fuer &amp;1 fehlgeschlagen (Dokument &amp;2)</TEXT>
+    </T100>
    </T100>
   </asx:values>
  </asx:abap>

@@ -24,8 +24,7 @@ class zcl_bc_mail_nast_invo_mail definition
              active              type abap_bool,
              sap_object          type saeanwdid,      " z. B. VBRK
              object_id           type saeobjid,       " Fakturanummer
-             invoice_doc_type    type saeobjart,      " Dokumentart Zeile 1
-             attachment_doc_type type saeobjart,      " Dokumentart ab Zeile 2
+             doc_type            type saeobjart,      " Dokumentart des zusammengefuehrten PDF
            end of archive_config.
 
     constants placeholder_invoice_number type typ_placeholder_d value '&INVOICE_NUMBER&'.
@@ -295,11 +294,8 @@ class zcl_bc_mail_nast_invo_mail implementation.
     archiver->archive(
         sap_object = archive_settings-sap_object
         object_id  = archive_settings-object_id
-        documents  = value #( for document in documents index into index
-                              ( ar_object = cond #( when index = 1
-                                                    then archive_settings-invoice_doc_type
-                                                    else archive_settings-attachment_doc_type )
-                                content   = document-document ) ) ).
+        ar_object  = archive_settings-doc_type
+        documents  = value #( for document in documents ( content = document-document ) ) ).
   endmethod.
 
 endclass.

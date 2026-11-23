@@ -20,6 +20,7 @@ CLASS zcl_bc_mail_nast_invo_archive IMPLEMENTATION.
       IN BACKGROUND TASK AS SEPARATE UNIT
       EXPORTING sap_object = sap_object
                 object_id  = object_id
+                ar_object  = ar_object
                 documents  = documents.
   ENDMETHOD.
 

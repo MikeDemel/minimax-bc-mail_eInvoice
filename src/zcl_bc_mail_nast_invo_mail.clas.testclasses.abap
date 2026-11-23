@@ -16,6 +16,7 @@ CLASS ltd_archive DEFINITION FINAL FOR TESTING.
     DATA received_documents  TYPE zbc_mail_nast_invo_arc_docs READ-ONLY.
     DATA received_sap_object TYPE saeanwdid READ-ONLY.
     DATA received_object_id  TYPE saeobjid READ-ONLY.
+    DATA received_ar_object  TYPE saeobjart READ-ONLY.
     DATA call_count          TYPE i READ-ONLY.
 ENDCLASS.
 
@@ -26,6 +27,7 @@ CLASS ltd_archive IMPLEMENTATION.
     received_documents  = documents.
     received_sap_object = sap_object.
     received_object_id  = object_id.
+    received_ar_object  = ar_object.
   ENDMETHOD.
 ENDCLASS.
 
@@ -69,8 +71,7 @@ CLASS ltc_send_mail_invoice IMPLEMENTATION.
         archive_settings = VALUE #( active              = abap_true
                                     sap_object          = 'VBRK'
                                     object_id           = '0090000001'
-                                    invoice_doc_type    = 'ZINVOICE'
-                                    attachment_doc_type = 'ZINVATT' )
+                                    doc_type            = 'ZINVOICE' )
         archiver         = archive_double ).
     cut->invoice_number = '0090000001'.
     cut->documents = VALUE #( ( document = pdf_content document_type = 'application/pdf' document_title = 'Rechnung' )
@@ -121,9 +122,9 @@ CLASS ltc_send_mail_invoice IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals( act = archive_double->call_count exp = 1 ).
     cl_abap_unit_assert=>assert_equals( act = lines( archive_double->received_documents ) exp = 2 ).
-    cl_abap_unit_assert=>assert_equals( act = archive_double->received_documents[ 1 ]-ar_object exp = 'ZINVOICE' ).
-    cl_abap_unit_assert=>assert_equals( act = archive_double->received_documents[ 2 ]-ar_object exp = 'ZINVATT' ).
+    cl_abap_unit_assert=>assert_equals( act = archive_double->received_ar_object exp = 'ZINVOICE' ).
     cl_abap_unit_assert=>assert_equals( act = archive_double->received_documents[ 1 ]-content exp = pdf_content ).
+    cl_abap_unit_assert=>assert_equals( act = archive_double->received_documents[ 2 ]-content exp = pdf_content ).
   ENDMETHOD.
 
 

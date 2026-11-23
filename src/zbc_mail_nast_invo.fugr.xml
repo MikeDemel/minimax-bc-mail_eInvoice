@@ -11,7 +11,7 @@
     <item>
      <FUNCNAME>Z_BC_MAIL_NAST_INVO_ARCHIVE</FUNCNAME>
      <REMOTE_CALL>R</REMOTE_CALL>
-     <SHORT_TEXT>ArchiveLink-Ablage von PDF-Dokumenten</SHORT_TEXT>
+     <SHORT_TEXT>PDF-Dokumente zusammenfuehren und ablegen</SHORT_TEXT>
      <IMPORT>
       <RSIMP>
        <PARAMETER>SAP_OBJECT</PARAMETER>
@@ -20,6 +20,10 @@
       <RSIMP>
        <PARAMETER>OBJECT_ID</PARAMETER>
        <TYP>SAEOBJID</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>AR_OBJECT</PARAMETER>
+       <TYP>SAEOBJART</TYP>
       </RSIMP>
       <RSIMP>
        <PARAMETER>DOCUMENTS</PARAMETER>
@@ -38,9 +42,14 @@
        <STEXT>Objektschluessel</STEXT>
       </RSFDO>
       <RSFDO>
+       <PARAMETER>AR_OBJECT</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Dokumentart des zusammengefuehrten PDF</STEXT>
+      </RSFDO>
+      <RSFDO>
        <PARAMETER>DOCUMENTS</PARAMETER>
        <KIND>P</KIND>
-       <STEXT>Abzulegende Dokumente</STEXT>
+       <STEXT>Zusammenzufuehrende PDF-Dokumente</STEXT>
       </RSFDO>
      </DOCUMENTATION>
     </item>

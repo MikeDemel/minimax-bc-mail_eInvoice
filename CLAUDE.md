@@ -22,8 +22,10 @@ Mailversand aus der Nachrichtensteuerung (NAST) zu Rechnungen: Nachrichtenart **
   aus `ZBC_IDOC_JOU_ACR-EMAIL` zu `NAST-PARNR` (fehlt → `ZBC01` 015), Absender = Adresse der
   Verkaufsorganisation, Body / Signatur aus SO10-Texten `ZBC_MAIL_NAST_INVO_BODY_<VKORG>` /
   `ZCA_<BUKRS>_SIGNATURE`.
-- Nach erfolgreichem Versand ArchiveLink-Ablage per tRFC (`Z_BC_MAIL_NAST_INVO_ARCHIVE` →
-  `ARCHIV_CREATE_TABLE`). Archivierungsmodus 2 = nur ablegen, kein Versand.
+- Nach erfolgreichem Versand ArchiveLink-Ablage per tRFC (`Z_BC_MAIL_NAST_INVO_ARCHIVE`):
+  Rechnung und Anhänge werden über `CL_RSPO_PDF_MERGE` (ADS) zu einem PDF zusammengeführt und
+  mit einer Dokumentart (NACE > Ablagesystem, Fallback `ZEDI_INVOI` wie im bisherigen Druckprozess) per `ARCHIV_CREATE_TABLE`
+  abgelegt. Archivierungsmodus 2 = nur ablegen, kein Versand.
 - Protokoll: Meldungen sammeln über `ZCL_SM_STA_MSG_HANDLER_FACTORY=>get_instance( )` (liefert
   immer eine neue Instanz), dann per `NAST_PROTOCOL_UPDATE` ins NAST-Protokoll. Eigene Meldungen
   in Nachrichtenklasse `ZBC_MAIL_NAST_INVO`, Fehler der Ermittlung in `ZBC01`.
@@ -47,12 +49,12 @@ Fachliche Doku in `docs/` (Customizing, nötige Änderungen an der Basisklasse).
 | `ZCL_BC_MAIL_NAST_INVO_MAIL` | Klasse | E-Mail-Versand und Ablage-Anstoß, erbt von `ZCL_SM_STA_SEND_MAIL` |
 | `ZIF_BC_MAIL_NAST_INVO_ARCHIVE` | Interface | Ablage, per Konstruktor injizierbar (Test-Double in den Unit-Tests) |
 | `ZCL_BC_MAIL_NAST_INVO_ARCHIVE` | Klasse | Ablage per tRFC (`IN BACKGROUND TASK AS SEPARATE UNIT`) |
-| `ZBC_MAIL_NAST_INVO` / `Z_BC_MAIL_NAST_INVO_ARCHIVE` | Funktionsgruppe / RFC-Baustein | Ablage über `ARCHIV_CREATE_TABLE`, Fehler → SM58 |
-| `ZBC_MAIL_NAST_INVO_ARC_DOC` / `_ARC_DOCS` | Struktur / Tabellentyp | Dokumente für die Ablage (`AR_OBJECT`, `CONTENT`) |
+| `ZBC_MAIL_NAST_INVO` / `Z_BC_MAIL_NAST_INVO_ARCHIVE` | Funktionsgruppe / RFC-Baustein | PDFs zusammenführen und über `ARCHIV_CREATE_TABLE` ablegen, Fehler → SM58 |
+| `ZBC_MAIL_NAST_INVO_ARC_DOC` / `_ARC_DOCS` | Struktur / Tabellentyp | PDF-Inhalte für die Ablage (`CONTENT`) |
 | `ZBC_MAIL_NAST_INVO` | Nachrichtenklasse | Meldungen für NAST-Protokoll und SM58 |
 
-Customizing (nicht im Repo): Nachrichtenart `ZEIM`, Dokumentarten `SDOINVOICE` / `ZSDINVATT`
-(OAC2 / OAC3), SO10-Texte, RSNAST00-Job. Details in `docs/NACE-Customizing.md`.
+Customizing (nicht im Repo): Nachrichtenart `ZEIM`, Dokumentart `ZEDI_INVOI` (wie Druckprozess) bzw.
+eigene PDF-Dokumentart (OAC2 / OAC3), ADS für das Zusammenführen, SO10-Texte, RSNAST00-Job. Details in `docs/NACE-Customizing.md`.
 
 ### Abhängigkeiten außerhalb des Repos
 
