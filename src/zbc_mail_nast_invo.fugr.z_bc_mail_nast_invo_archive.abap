@@ -23,14 +23,20 @@ FUNCTION z_bc_mail_nast_invo_archive.
   IF lines( documents ) = 1.
     merged_pdf = documents[ 1 ]-content.
   ELSE.
-    " Zusammenfuehren ueber ADS (Signatur von CL_RSPO_PDF_MERGE in SE24 gegenpruefen)
-    DATA(merger) = NEW cl_rspo_pdf_merge( ).
-    LOOP AT documents REFERENCE INTO DATA(document).
-      merger->add_document( document->content ).
-    ENDLOOP.
+    " Zusammenfuehren ueber ADS
+    TRY.
+        DATA(merger) = NEW cl_rspo_pdf_merge( ).
+        LOOP AT documents REFERENCE INTO DATA(document).
+          merger->add_document( document->content ).
+        ENDLOOP.
 
-    merger->merge_documents( IMPORTING merged_document = merged_pdf
-                                       rc              = merge_result ).
+        merger->merge_documents( IMPORTING merged_document = merged_pdf
+                                           rc              = merge_result ).
+      CATCH cx_rspo_pdf_merge INTO DATA(merge_error).
+        " Ohne CATCH gaebe es einen Kurzdump statt eines lesbaren SM58-Eintrags
+        MESSAGE merge_error TYPE 'E'.
+    ENDTRY.
+
     IF merge_result <> 0 OR merged_pdf IS INITIAL.
       merger->get_err_doc_index( IMPORTING index = error_index ).
       MESSAGE e014(zbc_mail_nast_invo) WITH object_id error_index.
