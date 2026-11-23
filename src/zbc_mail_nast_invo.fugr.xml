@@ -26,6 +26,10 @@
        <TYP>SAEOBJART</TYP>
       </RSIMP>
       <RSIMP>
+       <PARAMETER>INVOICE_NUMBER</PARAMETER>
+       <TYP>VBELN_VF</TYP>
+      </RSIMP>
+      <RSIMP>
        <PARAMETER>DOCUMENTS</PARAMETER>
        <TYP>ZBC_MAIL_NAST_INVO_ARC_DOCS</TYP>
       </RSIMP>
@@ -45,6 +49,11 @@
        <PARAMETER>AR_OBJECT</PARAMETER>
        <KIND>P</KIND>
        <STEXT>Dokumentart (alle Dokumente)</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>INVOICE_NUMBER</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Faktura (Titel, Dateiname)</STEXT>
       </RSFDO>
       <RSFDO>
        <PARAMETER>DOCUMENTS</PARAMETER>

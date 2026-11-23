@@ -17,6 +17,7 @@ CLASS ltd_archive DEFINITION FINAL FOR TESTING.
     DATA received_sap_object TYPE saeanwdid READ-ONLY.
     DATA received_object_id  TYPE saeobjid READ-ONLY.
     DATA received_ar_object  TYPE saeobjart READ-ONLY.
+    DATA received_invoice_nr TYPE vbeln_vf READ-ONLY.
     DATA call_count          TYPE i READ-ONLY.
 ENDCLASS.
 
@@ -28,6 +29,7 @@ CLASS ltd_archive IMPLEMENTATION.
     received_sap_object = sap_object.
     received_object_id  = object_id.
     received_ar_object  = ar_object.
+    received_invoice_nr = invoice_number.
   ENDMETHOD.
 ENDCLASS.
 
@@ -143,6 +145,7 @@ CLASS ltc_send_mail_invoice IMPLEMENTATION.
 
     cl_abap_unit_assert=>assert_equals( act = archive_double->received_sap_object exp = 'VBRK' ).
     cl_abap_unit_assert=>assert_equals( act = archive_double->received_object_id exp = '0090000001' ).
+    cl_abap_unit_assert=>assert_equals( act = archive_double->received_invoice_nr exp = '0090000001' ).
   ENDMETHOD.
 
 

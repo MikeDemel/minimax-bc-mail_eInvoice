@@ -299,10 +299,11 @@ class zcl_bc_mail_nast_invo_mail implementation.
     endif.
 
     archiver->archive(
-        sap_object = archive_settings-sap_object
-        object_id  = archive_settings-object_id
-        ar_object  = archive_settings-doc_type
-        documents  = value #( for document in documents ( content = document-document ) ) ).
+        sap_object     = archive_settings-sap_object
+        object_id      = archive_settings-object_id
+        ar_object      = archive_settings-doc_type
+        invoice_number = invoice_number
+        documents      = value #( for document in documents ( content = document-document ) ) ).
   endmethod.
 
 endclass.

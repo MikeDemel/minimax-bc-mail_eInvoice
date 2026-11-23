@@ -18,10 +18,11 @@ CLASS zcl_bc_mail_nast_invo_archive IMPLEMENTATION.
     " Fehler der Ablage fuehren so nie zu einem Verbuchungsabbruch.
     CALL FUNCTION 'Z_BC_MAIL_NAST_INVO_ARCHIVE'
       IN BACKGROUND TASK AS SEPARATE UNIT
-      EXPORTING sap_object = sap_object
-                object_id  = object_id
-                ar_object  = ar_object
-                documents  = documents.
+      EXPORTING sap_object     = sap_object
+                object_id      = object_id
+                ar_object      = ar_object
+                invoice_number = invoice_number
+                documents      = documents.
   ENDMETHOD.
 
 ENDCLASS.
