@@ -48,6 +48,7 @@ CLASS ltc_send_mail_invoice DEFINITION FINAL FOR TESTING
     METHODS file_name_gets_pdf_extension  FOR TESTING.
     METHODS file_name_keeps_extension     FOR TESTING.
     METHODS placeholder_has_invoice_nr    FOR TESTING.
+    METHODS placeholder_has_invoice_date  FOR TESTING.
     METHODS archives_invoice_and_attachmts FOR TESTING.
     METHODS archive_uses_object_key       FOR TESTING.
     METHODS no_archiving_when_inactive    FOR TESTING.
@@ -74,6 +75,7 @@ CLASS ltc_send_mail_invoice IMPLEMENTATION.
                                     doc_type            = 'ZINVOICE' )
         archiver         = archive_double ).
     cut->invoice_number = '0090000001'.
+    cut->invoice_date   = '20251123'.
     cut->documents = VALUE #( ( document = pdf_content document_type = 'application/pdf' document_title = 'Rechnung' )
                               ( document = pdf_content document_type = 'application/pdf' document_title = 'Lieferschein' ) ).
   ENDMETHOD.
@@ -110,10 +112,18 @@ CLASS ltc_send_mail_invoice IMPLEMENTATION.
 
     cut->set_placeholders( CHANGING ci_placeholder = placeholders ).
 
-    cl_abap_unit_assert=>assert_equals( act = lines( placeholders ) exp = 1 ).
-    cl_abap_unit_assert=>assert_equals( act = placeholders[ 1 ]-placeholder
-                                        exp = zcl_bc_mail_nast_invo_mail=>placeholder_invoice_number ).
-    cl_abap_unit_assert=>assert_equals( act = placeholders[ 1 ]-value exp = `90000001` ).
+    DATA(placeholder) = VALUE #( placeholders[ placeholder = zcl_bc_mail_nast_invo_mail=>placeholder_invoice_number ] OPTIONAL ).
+    cl_abap_unit_assert=>assert_equals( act = placeholder-value exp = `90000001` ).
+  ENDMETHOD.
+
+
+  METHOD placeholder_has_invoice_date.
+    DATA(placeholders) = VALUE zcl_sm_sta_send_mail=>ttyp_placeholder( ).
+
+    cut->set_placeholders( CHANGING ci_placeholder = placeholders ).
+
+    DATA(placeholder) = VALUE #( placeholders[ placeholder = zcl_bc_mail_nast_invo_mail=>placeholder_invoice_date ] OPTIONAL ).
+    cl_abap_unit_assert=>assert_equals( act = placeholder-value exp = `23.11.2025` ).
   ENDMETHOD.
 
 

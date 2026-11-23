@@ -28,6 +28,7 @@ class zcl_bc_mail_nast_invo_mail definition
            end of archive_config.
 
     constants placeholder_invoice_number type typ_placeholder_d value '&INVOICE_NUMBER&'.
+    constants placeholder_invoice_date   type typ_placeholder_d value '&INVOICE_DATE&'.
 
     "! Rohgroesse aller Dokumente der zuletzt versendeten E-Mail in Byte
     data total_size type i read-only.
@@ -41,6 +42,7 @@ class zcl_bc_mail_nast_invo_mail definition
     "! Zeile 1 = Rechnungs-PDF, ab Zeile 2 = Anhaenge. Nur PDF.
     methods send_invoice
       importing invoice_number type vbeln_vf
+                invoice_date   type fkdat
                 documents      type attachment_list
       raising   zcx_sm_sta_send_mail.
 
@@ -77,6 +79,7 @@ class zcl_bc_mail_nast_invo_mail definition
     data archive_settings type archive_config.
     data archiver         type ref to zif_bc_mail_nast_invo_archive.
     data invoice_number   type vbeln_vf.
+    data invoice_date     type fkdat.
     data documents        type attachment_list.
 
     methods add_attachment
@@ -120,6 +123,7 @@ class zcl_bc_mail_nast_invo_mail implementation.
 
   method send_invoice.
     me->invoice_number = invoice_number.
+    me->invoice_date   = invoice_date.
     me->documents      = documents.
     total_size = calculate_total_size( documents ).
 
@@ -207,7 +211,10 @@ class zcl_bc_mail_nast_invo_mail implementation.
   method set_placeholders.
     ci_placeholder = value #( base ci_placeholder
                               ( placeholder = placeholder_invoice_number
-                                value       = |{ invoice_number alpha = out }| ) ).
+                                value       = |{ invoice_number alpha = out }| )
+                              " Festes Format TT.MM.JJJJ, unabhaengig vom Benutzer des RSNAST00-Jobs
+                              ( placeholder = placeholder_invoice_date
+                                value       = |{ invoice_date+6(2) }.{ invoice_date+4(2) }.{ invoice_date(4) }| ) ).
   endmethod.
 
 

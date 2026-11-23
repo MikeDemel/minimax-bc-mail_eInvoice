@@ -84,6 +84,9 @@ class lcl_invoice_mail definition final.
     methods get_sender_address
       returning value(result) type AD_SMTPADR.
 
+    methods get_invoice_date
+      returning value(result) type fkdat.
+
     methods build_mail_settings
       returning value(result) type zcl_bc_mail_nast_invo_mail=>mail_config
       raising   zcx_sm_sta_send_mail.
@@ -198,6 +201,7 @@ class lcl_invoice_mail implementation.
     endif.
 
     mail->send_invoice( invoice_number = me->invoice_number
+                        invoice_date   = get_invoice_date( )
                         documents      = documents ).
     result-sent = abap_true.
   endmethod.
@@ -301,6 +305,15 @@ class lcl_invoice_mail implementation.
         and adr6~persnumber = @space
         and adr6~flgdefault = @abap_true
       into @result.
+  endmethod.
+
+
+  method get_invoice_date.
+    select single
+     from vbrk
+     fields fkdat
+     where vbeln = @me->invoice_number
+     into @result.
   endmethod.
 
 

@@ -24,7 +24,7 @@ Archivierungsmodus 2 (nur Ablegen) wird vom Programm unterstützt: Dann wird abg
 
 ## Texte (SO10, Text-ID ST)
 
-- `ZBC_MAIL_NAST_INVO_BODY_<VKORG>`: Body; der Texttitel wird zum Betreff. Beide dürfen `&INVOICE_NUMBER&` enthalten.
+- `ZBC_MAIL_NAST_INVO_BODY_<VKORG>`: Body; der Texttitel wird zum Betreff. Beide dürfen die Platzhalter `&INVOICE_NUMBER&` (Fakturanummer ohne führende Nullen) und `&INVOICE_DATE&` (Fakturadatum `VBRK-FKDAT` im Format TT.MM.JJJJ) enthalten.
 - `ZCA_<BUKRS>_SIGNATURE`: Signatur (Buchungskreis der Faktura).
 
 ## Empfänger
