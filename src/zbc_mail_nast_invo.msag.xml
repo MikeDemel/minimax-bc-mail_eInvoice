@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZBC_MAIL_NAST_INVO</ARBGB>
+    <MASTERLANG>D</MASTERLANG>
+    <STEXT>Rechnungsversand per E-Mail (ZEIM)</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>D</SPRSL>
+     <ARBGB>ZBC_MAIL_NAST_INVO</ARBGB>
+     <MSGNR>010</MSGNR>
+     <TEXT>Archivierung fuer &amp;1 (Dokumentart &amp;2) fehlgeschlagen</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>D</SPRSL>
+     <ARBGB>ZBC_MAIL_NAST_INVO</ARBGB>
+     <MSGNR>011</MSGNR>
+     <TEXT>E-Mail zur Faktura &amp;1 erzeugt, Gesamtgroesse &amp;2 Byte</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>D</SPRSL>
+     <ARBGB>ZBC_MAIL_NAST_INVO</ARBGB>
+     <MSGNR>012</MSGNR>
+     <TEXT>Fuer diese Nachrichtenart ist keine Bildschirmausgabe vorgesehen</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>D</SPRSL>
+     <ARBGB>ZBC_MAIL_NAST_INVO</ARBGB>
+     <MSGNR>013</MSGNR>
+     <TEXT>Faktura &amp;1 nur abgelegt (Archivierungsmodus 2), kein Versand</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>

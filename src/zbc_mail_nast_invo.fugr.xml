@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>Ablage Rechnungsdokumente (tRFC)</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZBC_MAIL_NAST_INVOTOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZBC_MAIL_NAST_INVO</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>Z_BC_MAIL_NAST_INVO_ARCHIVE</FUNCNAME>
+     <REMOTE_CALL>R</REMOTE_CALL>
+     <SHORT_TEXT>ArchiveLink-Ablage von PDF-Dokumenten</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>SAP_OBJECT</PARAMETER>
+       <TYP>SAEANWDID</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>OBJECT_ID</PARAMETER>
+       <TYP>SAEOBJID</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>DOCUMENTS</PARAMETER>
+       <TYP>ZBC_MAIL_NAST_INVO_ARC_DOCS</TYP>
+      </RSIMP>
+     </IMPORT>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>SAP_OBJECT</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Objekttyp (z. B. VBRK)</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>OBJECT_ID</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Objektschluessel</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>DOCUMENTS</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Abzulegende Dokumente</STEXT>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>
