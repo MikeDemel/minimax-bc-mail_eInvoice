@@ -238,7 +238,7 @@ class lcl_invoice_mail implementation.
 
     result = value #( ( document       = attachment_pdf
                         document_type  = 'application/pdf'
-                        document_title = |{ 'Rechnung'(001) } { me->invoice_number alpha = out } | ) ).
+                        document_title = |{ 'Rechnung'(001) } { me->invoice_number alpha = out }| ) ).
 
   endmethod.
 
